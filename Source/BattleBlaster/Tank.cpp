@@ -17,15 +17,11 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
-	if (PlayerController)
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
-		ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-		if (LocalPlayer)
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
 		{
-			UEnhancedInputLocalPlayerSubsystem* Subsystem;
-			Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-			if (Subsystem)
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 			{
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			}
