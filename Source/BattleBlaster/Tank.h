@@ -8,6 +8,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+#include "InputAction.h"
+#include "InputActionValue.h"
+#include "EnhancedInputComponent.h"
+
 #include "Tank.generated.h"
 
 class UCameraComponent;
@@ -36,9 +40,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	class UInputMappingContext* DefaultMappingContext;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* MoveAction;
+
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
+
+	void MoveInput();
 };
