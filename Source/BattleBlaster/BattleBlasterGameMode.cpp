@@ -25,14 +25,20 @@ void ABattleBlasterGameMode::BeginPlay()
 		}
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Start of the loop!"));
 	int32 LoopIndex = 0;
-	while (LoopIndex < 10)
+	while (LoopIndex < TowerCount)
 	{
-
-		UE_LOG(LogTemp, Display, TEXT("LoopIndex: %d"), LoopIndex);
+		AActor* TowerActor = Towers[LoopIndex];
+		if (TowerActor)
+		{
+			ATower* Tower = Cast<ATower>(TowerActor);
+			if (Tower && Tank)
+			{
+				Tower->Tank = Tank;
+				UE_LOG(LogTemp, Display, TEXT("%s setting the tank variable!"), *Tower->GetActorNameOrLabel());
+			}
+		}
 
 		LoopIndex++;
 	}
-	UE_LOG(LogTemp, Display, TEXT("End of the loop!"));
 }
