@@ -41,3 +41,10 @@ bool ATower::IsInFireRange()
 
 	return Result;
 }
+
+void ATower::HandleDestruction()
+{
+	Super::HandleDestruction();
+
+	Destroy();
+}

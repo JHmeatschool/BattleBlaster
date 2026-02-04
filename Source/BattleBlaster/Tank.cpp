@@ -83,3 +83,10 @@ void ATank::TurnInput(const FInputActionValue& Value)
 
 	AddActorLocalRotation(DeltaRotation, true);
 }
+
+void ATank::HandleDestruction()
+{
+	Super::HandleDestruction();
+
+	UE_LOG(LogTemp, Display, TEXT("Tank HandleDestruction!"));
+}
