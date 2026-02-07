@@ -3,6 +3,8 @@
 
 #include "BasePawn.h"
 
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 ABasePawn::ABasePawn()
 {
@@ -54,5 +56,14 @@ void ABasePawn::HandleDestruction()
 	if (DeathParticles)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetActorLocation(), GetActorRotation());
+	}
+	if (DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	}
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController)
+	{
+		PlayerController->ClientStartCameraShake(DeathCameraShakeClass);
 	}
 }
