@@ -1,6 +1,9 @@
 #include "HealthComponent.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "BattleBlasterGameMode.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/Controller.h" 
 
 UHealthComponent::UHealthComponent()
 {

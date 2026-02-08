@@ -1,8 +1,12 @@
 #include "Projectile.h"
+
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/StaticMeshComponent.h" 
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Sound/SoundBase.h" 
+#include "Camera/CameraShakeBase.h"
 
 AProjectile::AProjectile()
 {

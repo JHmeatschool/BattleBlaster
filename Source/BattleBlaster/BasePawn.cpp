@@ -1,8 +1,11 @@
 #include "BasePawn.h"
+
 #include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Projectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Camera/CameraShakeBase.h"
 
 ABasePawn::ABasePawn()
 {

@@ -1,25 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-
-#include "Components/TextBlock.h"
-
 #include "ScreenMessage.generated.h"
 
-/**
- * 
- */
+class UTextBlock;
+
 UCLASS()
 class BATTLEBLASTER_API UScreenMessage : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, meta = (BindWidjet))
-	UTextBlock* MessageTextBlock;
+	void SetMessageText(const FString& Message);
 
-	void SetMessageText(FString Message);
+private:
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* MessageTextBlock;
 };

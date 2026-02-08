@@ -1,9 +1,11 @@
 #include "BattleBlasterGameMode.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "Tower.h"
 #include "Tank.h"
 #include "ScreenMessage.h"
 #include "BattleBlasterGameInstance.h"
+#include "GameFramework/Controller.h"
 
 void ABattleBlasterGameMode::BeginPlay()
 {

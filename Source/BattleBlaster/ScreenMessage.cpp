@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ScreenMessage.h"
+#include "Components/TextBlock.h"
 
-void UScreenMessage::SetMessageText(FString Message)
+void UScreenMessage::SetMessageText(const FString& Message)
 {
-	FText MessageText = FText::FromString(Message);
-	MessageTextBlock->SetText(MessageText);
+	if (MessageTextBlock)
+	{
+		MessageTextBlock->SetText(FText::FromString(Message));
+	}
 }
