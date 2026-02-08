@@ -18,17 +18,6 @@ void ABattleBlasterGameMode::BeginPlay()
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	Tank = Cast<ATank>(PlayerPawn);
 
-	for (AActor* TowerActor : Towers)
-	{
-		if (ATower* Tower = Cast<ATower>(TowerActor))
-		{
-			if (Tank)
-			{
-				Tower->Tank = Tank;
-			}
-		}
-	}
-
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PlayerController && ScreenMessageClass)
 	{

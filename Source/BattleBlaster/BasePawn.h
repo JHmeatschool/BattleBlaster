@@ -20,7 +20,7 @@ public:
 
 	void RotateTurret(FVector LookAtTarget);
 	void Fire();
-	void HandleDestruction();
+	virtual void HandleDestruction();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

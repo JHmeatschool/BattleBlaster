@@ -1,13 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Tower.h"
+
+#include "Tank.h"
+#include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
 
 void ATower::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle FireRateTimerHandle;
+	Tank = Cast<ATank>(UGameplayStatics::GetPlayerPawn(this, 0));
+
 	GetWorldTimerManager().SetTimer(FireRateTimerHandle, this, &ATower::CheckFireCondition, FireRate, true);
 }
 
@@ -17,13 +19,23 @@ void ATower::Tick(float DeltaTime)
 
 	if (IsInFireRange())
 	{
-		RotateTurret(Tank->GetActorLocation());
+		if (Tank)
+		{
+			RotateTurret(Tank->GetActorLocation());
+		}
 	}
 }
 
 void ATower::CheckFireCondition()
 {
-	if (Tank && Tank->IsAlive && IsInFireRange())
+	if (Tank == nullptr)
+	{
+		return;
+	}
+
+	bool bIsTankAlive = !Tank->IsHidden();
+
+	if (bIsTankAlive && IsInFireRange())
 	{
 		Fire();
 	}
@@ -31,20 +43,19 @@ void ATower::CheckFireCondition()
 
 bool ATower::IsInFireRange()
 {
-	bool Result = false;
-
 	if (Tank)
 	{
-		float DistanceToTank = FVector::Dist(GetActorLocation(), Tank->GetActorLocation());
-		Result = (DistanceToTank <= FireRange);
+		float Distance = FVector::Dist(GetActorLocation(), Tank->GetActorLocation());
+		if (Distance <= FireRange)
+		{
+			return true;
+		}
 	}
-
-	return Result;
+	return false;
 }
 
 void ATower::HandleDestruction()
 {
 	Super::HandleDestruction();
-
 	Destroy();
 }
