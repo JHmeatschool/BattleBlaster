@@ -1,18 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "BattleBlasterGameInstance.h"
-
 #include "Kismet/GameplayStatics.h"
 
 void UBattleBlasterGameInstance::ChangeLevel(int32 Index)
 {
-	if (Index > 0 && Index <= LastLevelIndex)
+	if (Index >= FirstLevelIndex && Index <= LastLevelIndex)
 	{
 		CurrentLevelIndex = Index;
 
-		FString LevelNameString = FString::Printf(TEXT("Level_%d"), CurrentLevelIndex);
-		UGameplayStatics::OpenLevel(GetWorld(), *LevelNameString);
+		FString LevelNameString = FString::Printf(TEXT("%s%d"), *LevelNamePrefix, CurrentLevelIndex);
+		UGameplayStatics::OpenLevel(GetWorld(), FName(*LevelNameString));
 	}
 }
 
@@ -35,5 +31,5 @@ void UBattleBlasterGameInstance::RestartCurrentLevel()
 
 void UBattleBlasterGameInstance::RestartGame()
 {
-	ChangeLevel(1);
+	ChangeLevel(FirstLevelIndex);
 }
