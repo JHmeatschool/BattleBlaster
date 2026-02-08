@@ -1,49 +1,44 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-
-#include "Tank.h"
-#include "ScreenMessage.h"
-
 #include "BattleBlasterGameMode.generated.h"
 
-/**
- * 
- */
+class ATank;
+class UScreenMessage;
+
 UCLASS()
 class BATTLEBLASTER_API ABattleBlasterGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY(EditAnywhere)
+	void ActorDied(AActor* DeadActor);
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Game Loop")
 	TSubclassOf<UScreenMessage> ScreenMessageClass;
 
+	UPROPERTY(VisibleInstanceOnly, Category = "Game Loop")
 	UScreenMessage* ScreenMessageWidget;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = "Game Loop")
 	float GameOverDelay = 3.0f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = "Game Loop")
 	int32 CountdownDelay = 3;
 
-	int32 CountdownSeconds;
+	int32 CountdownSeconds = 0;
+	int32 TowerCount = 0;
+	bool IsVictory = false;
 
 	FTimerHandle CountdownTimerHandle;
 
-	bool IsVictory = false;
-
+	UPROPERTY(VisibleInstanceOnly, Category = "Game Loop")
 	ATank* Tank;
-	int32 TowerCount;
-
-	void ActorDied(AActor* DeadActor);
 
 	void OnGameOverTimerTimeout();
 	void OnCountdownTimerTimeout();

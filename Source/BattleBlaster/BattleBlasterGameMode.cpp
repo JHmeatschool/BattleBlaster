@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "BattleBlasterGameMode.h"
-
 #include "Kismet/GameplayStatics.h"
 #include "Tower.h"
+#include "Tank.h"
+#include "ScreenMessage.h"
 #include "BattleBlasterGameInstance.h"
 
 void ABattleBlasterGameMode::BeginPlay()
@@ -14,36 +12,23 @@ void ABattleBlasterGameMode::BeginPlay()
 	TArray<AActor*> Towers;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATower::StaticClass(), Towers);
 	TowerCount = Towers.Num();
-	UE_LOG(LogTemp, Display, TEXT("Number of towers: %d"), TowerCount);
 
-	APawn* PlayerPawn = (UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-	if (PlayerPawn)
-	{
-		Tank = Cast<ATank>(PlayerPawn);
-		if (!Tank)
-		{
-			UE_LOG(LogTemp, Display, TEXT("GameMode: Failed to find the tank actor!"));
-		}
-	}
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	Tank = Cast<ATank>(PlayerPawn);
 
-	int32 LoopIndex = 0;
-	while (LoopIndex < TowerCount)
+	for (AActor* TowerActor : Towers)
 	{
-		AActor* TowerActor = Towers[LoopIndex];
-		if (TowerActor)
+		if (ATower* Tower = Cast<ATower>(TowerActor))
 		{
-			ATower* Tower = Cast<ATower>(TowerActor);
-			if (Tower && Tank)
+			if (Tank)
 			{
 				Tower->Tank = Tank;
-				UE_LOG(LogTemp, Display, TEXT("%s setting the tank variable!"), *Tower->GetActorNameOrLabel());
 			}
 		}
-
-		LoopIndex++;
 	}
+
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PlayerController)
+	if (PlayerController && ScreenMessageClass)
 	{
 		ScreenMessageWidget = CreateWidget<UScreenMessage>(PlayerController, ScreenMessageClass);
 		if (ScreenMessageWidget)
@@ -59,55 +44,66 @@ void ABattleBlasterGameMode::BeginPlay()
 
 void ABattleBlasterGameMode::OnCountdownTimerTimeout()
 {
-	CountdownSeconds -= 1;
+	CountdownSeconds--;
 
 	if (CountdownSeconds > 0)
 	{
-		ScreenMessageWidget->SetMessageText(FString::FromInt(CountdownSeconds));
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->SetMessageText(FString::FromInt(CountdownSeconds));
+		}
 	}
 	else if (CountdownSeconds == 0)
 	{
-		ScreenMessageWidget->SetMessageText("Go!");
-		Tank->SetPlayerEnabled(true);
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->SetMessageText("Go!");
+		}
+		if (Tank)
+		{
+			Tank->SetPlayerEnabled(true);
+		}
 	}
 	else
 	{
-		// CountdownSeconds is less than 0
 		GetWorldTimerManager().ClearTimer(CountdownTimerHandle);
-		ScreenMessageWidget->SetVisibility(ESlateVisibility::Hidden);
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 
 void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 {
-	bool IsGameOver = false;	
+	bool IsGameOver = false;
 
 	if (DeadActor == Tank)
 	{
 		Tank->HandleDestruction();
+		IsVictory = false;
 		IsGameOver = true;
 	}
-	else
+	else if (ATower* DeadTower = Cast<ATower>(DeadActor))
 	{
-		ATower* DeadTower = Cast<ATower>(DeadActor);
-		if (DeadTower)
-		{
-			DeadTower->HandleDestruction();
+		DeadTower->HandleDestruction();
+		TowerCount--;
 
-			TowerCount--;
-			if (TowerCount == 0)
-			{
-				IsGameOver = true;
-				IsVictory = true;
-			}
+		if (TowerCount <= 0)
+		{
+			IsVictory = true;
+			IsGameOver = true;
 		}
 	}
 
 	if (IsGameOver)
 	{
-		FString GameOverString = IsVictory ? "Victory!" : "Defeat!";
-		ScreenMessageWidget->SetMessageText(GameOverString);
-		ScreenMessageWidget->SetVisibility(ESlateVisibility::Visible);
+		if (ScreenMessageWidget)
+		{
+			FString GameOverString = IsVictory ? "Victory!" : "Defeat!";
+			ScreenMessageWidget->SetMessageText(GameOverString);
+			ScreenMessageWidget->SetVisibility(ESlateVisibility::Visible);
+		}
 
 		FTimerHandle GameOverTimerHandle;
 		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ABattleBlasterGameMode::OnGameOverTimerTimeout, GameOverDelay, false);
@@ -116,23 +112,15 @@ void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 
 void ABattleBlasterGameMode::OnGameOverTimerTimeout()
 {
-	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
+	if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
 	{
-		UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GameInstance);
-		if (BBGameInstance)
+		if (IsVictory)
 		{
-			if (IsVictory)
-			{
-				// Load the next level
-				BBGameInstance->LoadNextLevel();
-			}
-			else
-			{
-				// Reload the current level
-				BBGameInstance->RestartCurrentLevel();
-			}
-			
+			BBGameInstance->LoadNextLevel();
+		}
+		else
+		{
+			BBGameInstance->RestartCurrentLevel();
 		}
 	}
 }
