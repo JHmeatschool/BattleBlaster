@@ -1,73 +1,59 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "BasePawn.h"
-
-#include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputSubsystems.h"
-
-#include "InputAction.h"
 #include "InputActionValue.h"
-#include "EnhancedInputComponent.h"
-
 #include "Tank.generated.h"
 
+class USpringArmComponent;
 class UCameraComponent;
+class UInputMappingContext;
+class UInputAction;
 
-/**
- * 
- */
 UCLASS()
 class BATTLEBLASTER_API ATank : public ABasePawn
 {
 	GENERATED_BODY()
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:
 	ATank();
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	UPROPERTY(EditAnywhere, Category = "Input")
-	class UInputMappingContext* DefaultMappingContext;
+	virtual void Tick(float DeltaTime) override;
+	void HandleDestruction();
+	void SetPlayerEnabled(bool bPlayerEnabled);
 
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* MoveAction;
+protected:
+	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* TurnAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* FireAction;
-
-	UPROPERTY(VisibleAnywhere)
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UCameraComponent* CameraComp;
 
-	UPROPERTY(EditAnywhere)
-	float Speed = 300.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputMappingContext* DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere)
-	float TurnRate = 50.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* MoveAction;
 
-	APlayerController* PlayerController;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* TurnAction;
 
-	bool IsAlive = true;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* FireAction;
 
-	void MoveInput(const FInputActionValue& Value);
-	void TurnInput(const FInputActionValue& Value);
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float Speed = 400.0f;
 
-	void HandleDestruction();
-	void SetPlayerEnabled(bool Enabled);
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float TurnRate = 60.0f;
+
+	void Move(const FInputActionValue& Value);
+	void Turn(const FInputActionValue& Value);
+
+	APlayerController* TankPlayerController;
+	bool bIsAlive = true;
 };

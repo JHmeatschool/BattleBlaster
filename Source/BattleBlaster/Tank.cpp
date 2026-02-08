@@ -1,89 +1,44 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Tank.h"
 
+#include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "InputMappingContext.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ATank::ATank()
 {
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
-	SpringArmComp->SetupAttachment(CapsuleComp);
+	SpringArmComp->SetupAttachment(RootComponent);
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 }
 
-// Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PlayerController = Cast<APlayerController>(Controller);
-	if (PlayerController)
+	TankPlayerController = Cast<APlayerController>(GetController());
+	if (TankPlayerController)
 	{
-		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(TankPlayerController->GetLocalPlayer()))
 		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-			{
-				Subsystem->AddMappingContext(DefaultMappingContext, 0);
-			}
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
-	SetPlayerEnabled(false);
 }
 
-// Called every frame
 void ATank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (PlayerController)
+	if (TankPlayerController)
 	{
 		FHitResult HitResult;
-		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
-
+		TankPlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		RotateTurret(HitResult.ImpactPoint);
-
-		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 25.0f, 12, FColor::Red);
 	}
-}
-
-// Called to bind functionality to input
-void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATank::MoveInput);
-
-		EIC->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATank::TurnInput);
-
-		EIC->BindAction(FireAction, ETriggerEvent::Started, this, &ATank::Fire);
-	}
-}
-
-void ATank::MoveInput(const FInputActionValue& Value)
-{
-	float InputValue = Value.Get<float>();
-
-	FVector DeltaLocation = FVector(0.0f, 0.0f, 0.0f);
-	DeltaLocation.X = Speed * InputValue * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
-	AddActorLocalOffset(DeltaLocation, true);
-}
-
-void ATank::TurnInput(const FInputActionValue& Value)
-{
-	float InputValue = Value.Get<float>();
-
-	FRotator DeltaRotation = FRotator(0.0f, 0.0f, 0.0f);
-	DeltaRotation.Yaw = TurnRate * InputValue * GetWorld()->GetDeltaSeconds();
-
-	AddActorLocalRotation(DeltaRotation, true);
 }
 
 void ATank::HandleDestruction()
@@ -92,24 +47,53 @@ void ATank::HandleDestruction()
 
 	SetActorHiddenInGame(true);
 	SetActorTickEnabled(false);
-	SetPlayerEnabled(false);
-	
-	IsAlive = false;
+	bIsAlive = false;
 }
 
-void ATank::SetPlayerEnabled(bool Enabled)
+void ATank::SetPlayerEnabled(bool bPlayerEnabled)
 {
-	if (PlayerController)
-	{
-		if (Enabled)
-		{
-			EnableInput(PlayerController);
-		}
-		else
-		{
-			DisableInput(PlayerController);
-		}
+	if (!TankPlayerController) return;
 
-		PlayerController->bShowMouseCursor = Enabled;
+	if (bPlayerEnabled)
+	{
+		EnableInput(TankPlayerController);
 	}
+	else
+	{
+		DisableInput(TankPlayerController);
+	}
+
+	TankPlayerController->bShowMouseCursor = bPlayerEnabled;
+}
+
+void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATank::Move);
+		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATank::Turn);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ATank::Fire);
+	}
+}
+
+void ATank::Move(const FInputActionValue& Value)
+{
+	const float CurrentValue = Value.Get<float>();
+
+	FVector DeltaLocation = FVector::ZeroVector;
+	DeltaLocation.X = CurrentValue * Speed * UGameplayStatics::GetWorldDeltaSeconds(this);
+
+	AddActorLocalOffset(DeltaLocation, true);
+}
+
+void ATank::Turn(const FInputActionValue& Value)
+{
+	const float CurrentValue = Value.Get<float>();
+
+	FRotator DeltaRotation = FRotator::ZeroRotator;
+	DeltaRotation.Yaw = CurrentValue * TurnRate * UGameplayStatics::GetWorldDeltaSeconds(this);
+
+	AddActorLocalRotation(DeltaRotation, true);
 }
