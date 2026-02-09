@@ -46,10 +46,27 @@ void ABattleBlasterGameMode::OnCountdownTimerTimeout()
 	}
 	else if (CountdownSeconds == 0)
 	{
+		FString StartMessage = TEXT("Go!"); 
+
+		if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
+		{
+			int32 CurrentLevel = BBGameInstance->GetCurrentLevelIndex();
+
+			if (CurrentLevel == 3)
+			{
+				StartMessage = TEXT("Final Go!");
+			}
+			else
+			{
+				StartMessage = FString::Printf(TEXT("Level %d Go!"), CurrentLevel);
+			}
+		}
+
 		if (ScreenMessageWidget)
 		{
-			ScreenMessageWidget->SetMessageText("Go!");
+			ScreenMessageWidget->SetMessageText(StartMessage);
 		}
+
 		if (Tank)
 		{
 			Tank->SetPlayerEnabled(true);
@@ -91,7 +108,21 @@ void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 	{
 		if (ScreenMessageWidget)
 		{
-			FString GameOverString = IsVictory ? "Victory!" : "Defeat!";
+			FString GameOverString = TEXT("Defeat!"); 
+
+			if (IsVictory)
+			{
+				GameOverString = TEXT("Victory!");
+
+				if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
+				{
+					if (BBGameInstance->GetCurrentLevelIndex() == 3)
+					{
+						GameOverString = TEXT("Mission Complete!");
+					}
+				}
+			}
+
 			ScreenMessageWidget->SetMessageText(GameOverString);
 			ScreenMessageWidget->SetVisibility(ESlateVisibility::Visible);
 		}
@@ -107,6 +138,11 @@ void ABattleBlasterGameMode::OnGameOverTimerTimeout()
 	{
 		if (IsVictory)
 		{
+			if (BBGameInstance->GetCurrentLevelIndex() == 3)
+			{
+				return;
+			}
+
 			BBGameInstance->LoadNextLevel();
 		}
 		else

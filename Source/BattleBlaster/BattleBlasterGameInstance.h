@@ -14,6 +14,8 @@ public:
 	void RestartCurrentLevel();
 	void RestartGame();
 
+	int32 GetCurrentLevelIndex() const { return CurrentLevelIndex; }
+
 private:
 	void ChangeLevel(int32 Index);
 
