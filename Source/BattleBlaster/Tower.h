@@ -19,10 +19,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	float FireRange = 700.0f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	float FireRate = 2.0f;
 
 	FTimerHandle FireRateTimerHandle;
