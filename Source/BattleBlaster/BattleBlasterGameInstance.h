@@ -16,6 +16,13 @@ public:
 
 	int32 GetCurrentLevelIndex() const { return CurrentLevelIndex; }
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetPlayerLives() const { return PlayerLives; }
+
+	bool ConsumeLife();
+
+	void ResetLives();
+
 private:
 	void ChangeLevel(int32 Index);
 
@@ -30,4 +37,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level Status", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentLevelIndex = 1;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int32 PlayerLives = 3;
 };

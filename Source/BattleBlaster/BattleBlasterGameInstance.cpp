@@ -1,6 +1,22 @@
 #include "BattleBlasterGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
+bool UBattleBlasterGameInstance::ConsumeLife()
+{
+	if (PlayerLives <= 0)
+	{
+		return false;
+	}
+
+	PlayerLives--;
+	return PlayerLives > 0;
+}
+
+void UBattleBlasterGameInstance::ResetLives()
+{
+	PlayerLives = 3;
+}
+
 void UBattleBlasterGameInstance::ChangeLevel(int32 Index)
 {
 	if (Index >= FirstLevelIndex && Index <= LastLevelIndex)
@@ -31,5 +47,6 @@ void UBattleBlasterGameInstance::RestartCurrentLevel()
 
 void UBattleBlasterGameInstance::RestartGame()
 {
+	ResetLives();
 	ChangeLevel(FirstLevelIndex);
 }

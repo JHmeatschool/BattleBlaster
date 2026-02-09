@@ -1,11 +1,11 @@
 #include "BattleBlasterGameMode.h"
-
 #include "Kismet/GameplayStatics.h"
 #include "Tower.h"
 #include "Tank.h"
 #include "ScreenMessage.h"
 #include "BattleBlasterGameInstance.h"
 #include "GameFramework/Controller.h"
+#include "Blueprint/UserWidget.h"
 
 void ABattleBlasterGameMode::BeginPlay()
 {
@@ -19,6 +19,16 @@ void ABattleBlasterGameMode::BeginPlay()
 	Tank = Cast<ATank>(PlayerPawn);
 
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (PlayerController && StartHUDClass)
+	{
+		HUDWidget = CreateWidget<UUserWidget>(PlayerController, StartHUDClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
+
 	if (PlayerController && ScreenMessageClass)
 	{
 		ScreenMessageWidget = CreateWidget<UScreenMessage>(PlayerController, ScreenMessageClass);
@@ -46,7 +56,7 @@ void ABattleBlasterGameMode::OnCountdownTimerTimeout()
 	}
 	else if (CountdownSeconds == 0)
 	{
-		FString StartMessage = TEXT("Go!"); 
+		FString StartMessage = TEXT("Go!");
 
 		if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
 		{
@@ -89,6 +99,16 @@ void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 	if (DeadActor == Tank)
 	{
 		Tank->HandleDestruction();
+
+		if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
+		{
+			if (BBGameInstance->ConsumeLife())
+			{
+				BBGameInstance->RestartCurrentLevel();
+				return;
+			}
+		}
+
 		IsVictory = false;
 		IsGameOver = true;
 	}
@@ -108,7 +128,7 @@ void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 	{
 		if (ScreenMessageWidget)
 		{
-			FString GameOverString = TEXT("Defeat!"); 
+			FString GameOverString = TEXT("Game Over!");
 
 			if (IsVictory)
 			{
@@ -142,12 +162,18 @@ void ABattleBlasterGameMode::OnGameOverTimerTimeout()
 			{
 				return;
 			}
-
 			BBGameInstance->LoadNextLevel();
 		}
 		else
 		{
-			BBGameInstance->RestartCurrentLevel();
+			if (BBGameInstance->GetPlayerLives() > 0)
+			{
+				BBGameInstance->RestartCurrentLevel();
+			}
+			else
+			{
+				return;
+			}
 		}
 	}
 }

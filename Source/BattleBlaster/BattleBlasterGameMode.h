@@ -25,6 +25,12 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Game Loop")
 	UScreenMessage* ScreenMessageWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Loop", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> StartHUDClass;
+
+	UPROPERTY()
+	class UUserWidget* HUDWidget;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Game Loop")
 	float GameOverDelay = 3.0f;
 

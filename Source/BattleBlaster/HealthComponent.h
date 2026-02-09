@@ -14,6 +14,9 @@ class BATTLEBLASTER_API UHealthComponent : public UActorComponent
 public:
 	UHealthComponent();
 
+	UFUNCTION(BlueprintCallable)
+	float GetHealthPercent() const;
+
 protected:
 	virtual void BeginPlay() override;
 

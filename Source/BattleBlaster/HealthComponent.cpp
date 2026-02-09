@@ -10,6 +10,12 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+float UHealthComponent::GetHealthPercent() const
+{
+	if (MaxHealth <= 0.0f) return 0.0f;
+	return Health / MaxHealth;
+}
+
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
