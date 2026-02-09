@@ -20,13 +20,6 @@ void ATank::BeginPlay()
 	Super::BeginPlay();
 
 	TankPlayerController = Cast<APlayerController>(GetController());
-	if (TankPlayerController)
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(TankPlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
 }
 
 void ATank::Tick(float DeltaTime)
@@ -52,15 +45,23 @@ void ATank::HandleDestruction()
 
 void ATank::SetPlayerEnabled(bool bPlayerEnabled)
 {
+	if (!TankPlayerController)
+	{
+		TankPlayerController = Cast<APlayerController>(GetController());
+	}
+
 	if (!TankPlayerController) return;
 
-	if (bPlayerEnabled)
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(TankPlayerController->GetLocalPlayer()))
 	{
-		EnableInput(TankPlayerController);
-	}
-	else
-	{
-		DisableInput(TankPlayerController);
+		if (bPlayerEnabled)
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+		else
+		{
+			Subsystem->RemoveMappingContext(DefaultMappingContext);
+		}
 	}
 
 	TankPlayerController->bShowMouseCursor = bPlayerEnabled;

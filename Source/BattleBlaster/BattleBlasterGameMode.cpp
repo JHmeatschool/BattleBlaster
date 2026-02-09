@@ -18,6 +18,11 @@ void ABattleBlasterGameMode::BeginPlay()
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	Tank = Cast<ATank>(PlayerPawn);
 
+	if (Tank)
+	{
+		Tank->SetPlayerEnabled(false);
+	}
+
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	if (PlayerController && StartHUDClass)
@@ -94,46 +99,50 @@ void ABattleBlasterGameMode::OnCountdownTimerTimeout()
 
 void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 {
-	bool IsGameOver = false;
-
 	if (DeadActor == Tank)
 	{
 		Tank->HandleDestruction();
 
+		if (Tank->GetController())
+		{
+			Tank->SetPlayerEnabled(false);
+		}
+
 		if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
 		{
-			if (BBGameInstance->ConsumeLife())
+			if (!BBGameInstance->ConsumeLife())
 			{
-				BBGameInstance->RestartCurrentLevel();
-				return;
+				IsGameOver = true;
 			}
 		}
 
-		IsVictory = false;
-		IsGameOver = true;
+		FTimerHandle TimerHandle;
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleBlasterGameMode::OnGameOverTimerTimeout);
+		GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, GameOverDelay, false);
 	}
-	else if (ATower* DeadTower = Cast<ATower>(DeadActor))
+	else if (ATower* DestroyedTower = Cast<ATower>(DeadActor))
 	{
-		DeadTower->HandleDestruction();
-		TowerCount--;
+		DestroyedTower->HandleDestruction();
 
-		if (TowerCount <= 0)
+		TowerCount--;
+		if (TowerCount == 0)
 		{
 			IsVictory = true;
-			IsGameOver = true;
+
+			FTimerHandle TimerHandle;
+			FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleBlasterGameMode::OnGameOverTimerTimeout);
+			GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, GameOverDelay, false);
 		}
 	}
 
-	if (IsGameOver)
+	if (IsGameOver || IsVictory)
 	{
 		if (ScreenMessageWidget)
 		{
-			FString GameOverString = TEXT("Game Over!");
+			FString GameOverString = IsVictory ? TEXT("Victory!") : TEXT("Game Over!");
 
 			if (IsVictory)
 			{
-				GameOverString = TEXT("Victory!");
-
 				if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
 				{
 					if (BBGameInstance->GetCurrentLevelIndex() == 3)
@@ -146,9 +155,6 @@ void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 			ScreenMessageWidget->SetMessageText(GameOverString);
 			ScreenMessageWidget->SetVisibility(ESlateVisibility::Visible);
 		}
-
-		FTimerHandle GameOverTimerHandle;
-		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ABattleBlasterGameMode::OnGameOverTimerTimeout, GameOverDelay, false);
 	}
 }
 

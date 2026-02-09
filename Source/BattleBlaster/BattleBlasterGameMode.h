@@ -40,6 +40,7 @@ private:
 	int32 CountdownSeconds = 0;
 	int32 TowerCount = 0;
 	bool IsVictory = false;
+	bool IsGameOver = false;
 
 	FTimerHandle CountdownTimerHandle;
 
