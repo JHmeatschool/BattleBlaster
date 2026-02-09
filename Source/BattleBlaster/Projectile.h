@@ -45,7 +45,7 @@ private:
 	TSubclassOf<UCameraShakeBase> HitCameraShakeClass;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
-	float Damage = 50.0f;
+	float Damage = 25.0f;
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
