@@ -1,12 +1,21 @@
 #include "Tower.h"
-
 #include "Tank.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "BattleBlasterGameInstance.h"
 
 void ATower::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
+	{
+		if (BBGameInstance->IsTowerDestroyed(GetName()))
+		{
+			Destroy();
+			return;
+		}
+	}
 
 	Tank = Cast<ATank>(UGameplayStatics::GetPlayerPawn(this, 0));
 
@@ -57,5 +66,11 @@ bool ATower::IsInFireRange()
 void ATower::HandleDestruction()
 {
 	Super::HandleDestruction();
+
+	if (UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance()))
+	{
+		BBGameInstance->AddDestroyedTower(GetName());
+	}
+
 	Destroy();
 }

@@ -32,7 +32,7 @@ private:
 	class UUserWidget* HUDWidget;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Loop")
-	float GameOverDelay = 3.0f;
+	float GameOverDelay = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Loop")
 	int32 CountdownDelay = 3;

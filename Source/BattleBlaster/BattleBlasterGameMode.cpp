@@ -11,9 +11,23 @@ void ABattleBlasterGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TowerCount = 0;
 	TArray<AActor*> Towers;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATower::StaticClass(), Towers);
-	TowerCount = Towers.Num();
+
+	UBattleBlasterGameInstance* BBGameInstance = Cast<UBattleBlasterGameInstance>(GetGameInstance());
+
+	for (AActor* TowerActor : Towers)
+	{
+		if (IsValid(TowerActor))
+		{
+			if (BBGameInstance && BBGameInstance->IsTowerDestroyed(TowerActor->GetName()))
+			{
+				continue;
+			}
+			TowerCount++;
+		}
+	}
 
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	Tank = Cast<ATank>(PlayerPawn);
@@ -118,7 +132,7 @@ void ABattleBlasterGameMode::ActorDied(AActor* DeadActor)
 
 		FTimerHandle TimerHandle;
 		FTimerDelegate TimerDelegate = FTimerDelegate::CreateUObject(this, &ABattleBlasterGameMode::OnGameOverTimerTimeout);
-		GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, GameOverDelay, false);
+		GetWorldTimerManager().SetTimer(TimerHandle, TimerDelegate, 2.0f, false);
 	}
 	else if (ATower* DestroyedTower = Cast<ATower>(DeadActor))
 	{

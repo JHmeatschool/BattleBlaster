@@ -17,6 +17,21 @@ void UBattleBlasterGameInstance::ResetLives()
 	PlayerLives = 3;
 }
 
+void UBattleBlasterGameInstance::AddDestroyedTower(FString TowerName)
+{
+	DestroyedTowers.AddUnique(TowerName);
+}
+
+bool UBattleBlasterGameInstance::IsTowerDestroyed(FString TowerName)
+{
+	return DestroyedTowers.Contains(TowerName);
+}
+
+void UBattleBlasterGameInstance::ClearDestroyedTowers()
+{
+	DestroyedTowers.Empty();
+}
+
 void UBattleBlasterGameInstance::ChangeLevel(int32 Index)
 {
 	if (Index >= FirstLevelIndex && Index <= LastLevelIndex)
@@ -30,6 +45,8 @@ void UBattleBlasterGameInstance::ChangeLevel(int32 Index)
 
 void UBattleBlasterGameInstance::LoadNextLevel()
 {
+	ClearDestroyedTowers();
+
 	if (CurrentLevelIndex < LastLevelIndex)
 	{
 		ChangeLevel(CurrentLevelIndex + 1);
@@ -47,6 +64,7 @@ void UBattleBlasterGameInstance::RestartCurrentLevel()
 
 void UBattleBlasterGameInstance::RestartGame()
 {
+	ClearDestroyedTowers();
 	ResetLives();
 	ChangeLevel(FirstLevelIndex);
 }

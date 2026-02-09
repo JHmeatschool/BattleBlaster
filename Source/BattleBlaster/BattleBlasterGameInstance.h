@@ -23,6 +23,12 @@ public:
 
 	void ResetLives();
 
+	void AddDestroyedTower(FString TowerName);
+
+	bool IsTowerDestroyed(FString TowerName);
+
+	void ClearDestroyedTowers();
+
 private:
 	void ChangeLevel(int32 Index);
 
@@ -41,4 +47,6 @@ private:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 PlayerLives = 3;
+
+	TArray<FString> DestroyedTowers;
 };
