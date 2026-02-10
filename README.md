@@ -6,7 +6,7 @@
 ---
 
 ## 📺 Project Showcase
-- **Demonstration Video:** [유튜브 링크]
+- **Demonstration Video:** [https://youtu.be/TvSqCbogWNw]
 
 ---
 
